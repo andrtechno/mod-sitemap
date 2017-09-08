@@ -1,0 +1,23 @@
+{
+    "name": "panix/mod-sitemap",
+    "description": "Module shop",
+    "keywords": ["corner-cms", "module", "sitemap"],
+    "homepage": "https://github.com/andrtechno/mod-sitemap",
+    "type": "module",
+    "license": "BSD 3-Clause",
+    "authors": [
+        {
+            "name": "CORNER CMS",
+            "email": "dev@corner-cms.com",
+            "homepage": "http://www.corner-cms.com/"
+        }
+    ],
+    "require": {
+        "panix/mod-shop": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "panix\\mod\\sitemap\\": ""
+        }
+    }
+}
