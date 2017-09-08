@@ -1,20 +1,25 @@
 <?php
+namespace panix\mod\sitemap\controllers;
 
-class DefaultController extends Controller {
+use Yii;
+use panix\engine\controllers\WebController;
+
+class DefaultController extends WebController {
 
     /**
      * Render sitemap.xml
      */
     public function actionIndex() {
-        $cacheKey = 'sitemap.xml.data';
-        $data = Yii::app()->cache->get($cacheKey);
+        $cacheKey = 'sitemap.xml.cache';
+        $data = Yii::$app->cache->get($cacheKey);
 
         if (!$data) {
+
             $data = $this->renderPartial('xml', array(
-                'urls' => $this->getModule()->getUrls()
+                'urls' => Yii::$app->getModule('sitemap')->getUrls()
                     ), true);
 
-            Yii::app()->cache->set($cacheKey, $data, Yii::app()->settings->get('app','cache_time'));
+            Yii::$app->cache->set($cacheKey, $data, 3200*12);
         }
 
         if (!headers_sent())

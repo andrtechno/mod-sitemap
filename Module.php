@@ -1,11 +1,16 @@
 <?php
 
+namespace panix\mod\sitemap;
+
+use Yii;
+use yii\db\Query;
+use yii\helpers\Url;
+
 class Module extends \panix\engine\WebModule {
 
-    /**
-     * Иконка модуля
-     * @var string 
-     */
+    public $routes = [
+        'sitemap.xml' => 'sitemap/default/index',
+    ];
     public $icon = 'icon-sitemap';
 
     /**
@@ -16,7 +21,7 @@ class Module extends \panix\engine\WebModule {
     /**
      * @var array
      */
-    public $urls = array();
+    protected $_urls = [];
 
     /**
      * @return array
@@ -25,45 +30,40 @@ class Module extends \panix\engine\WebModule {
         $this->loadProducts();
         $this->loadManufacturers();
         $this->loadCategories();
-
-        return $this->urls;
+        return $this->_urls;
     }
-
 
     /**
      * Load products data
      */
     public function loadProducts() {
-        $products = Yii::$app->db->createCommand()
+        $products = (new Query())
+                ->select(['seo_alias', 'date_create as date'])
                 ->from('{{%shop_product}}')
-                ->select('seo_alias, date_create as date')
-                ->queryAll();
-
-        $this->populateUrls('shop/product/view', $products);
+                ->all();
+        $this->populateUrls('/shop/default/view', $products);
     }
 
     /**
      * Load manufacturers data
      */
     public function loadManufacturers() {
-        $records = Yii::$app->db->createCommand()
+        $records = (new Query())
+                ->select(['seo_alias'])
                 ->from('{{%shop_manufacturer}}')
-                ->select('seo_alias')
-                ->queryAll();
-
-        $this->populateUrls('shop/manufacturer/index', $records);
+                ->all();
+        $this->populateUrls('/shop/manufacturer/index', $records);
     }
 
     /**
      * Load categories data
      */
     public function loadCategories() {
-        $records = Yii::$app->db->createCommand()
+        $records = (new Query())
+                ->select(['full_path as seo_alias'])
                 ->from('{{%shop_category}}')
-                ->select('full_path as seo_alias')
                 ->where('id > 1')
-                ->queryAll();
-
+                ->all();
         $this->populateUrls('/shop/category/view', $records);
     }
 
@@ -77,22 +77,18 @@ class Module extends \panix\engine\WebModule {
      */
     public function populateUrls($route, $records, $changefreq = 'daily', $priority = '1.0') {
         foreach ($records as $p) {
-            $url = Yii::app()->createAbsoluteUrl($route, array('seo_alias' => $p['seo_alias']));
+            if (isset($p['seo_alias']) && !empty($p['seo_alias'])) {
+                $url = Yii::$app->urlManager->createAbsoluteUrl([$route, 'seo_alias' => $p['seo_alias']], true);
 
-            $this->urls[$url] = array(
-                'changefreq' => $changefreq,
-                'priority' => $priority
-            );
+                $this->_urls[$url] = array(
+                    'changefreq' => $changefreq,
+                    'priority' => $priority
+                );
 
-            if (isset($p['date']) && strtotime($p['date']))
-                $this->urls[$url]['lastmod'] = date('Y-m-d', strtotime($p['date']));
+                if (isset($p['date']) && strtotime($p['date']))
+                    $this->_urls[$url]['lastmod'] = date('Y-m-d', strtotime($p['date']));
+            }
         }
-    }
-
-    public function getRules() {
-        return array(
-            '/sitemap.xml' => array('sitemap/default/index'),
-        );
     }
 
 }
