@@ -1,6 +1,6 @@
 {
     "name": "panix/mod-sitemap",
-    "description": "Module shop",
+    "description": "Module sitemap",
     "keywords": ["corner-cms", "module", "sitemap"],
     "homepage": "https://github.com/andrtechno/mod-sitemap",
     "type": "module",
@@ -12,9 +12,6 @@
             "homepage": "http://www.corner-cms.com/"
         }
     ],
-    "require": {
-        "panix/mod-shop": "*"
-    },
     "autoload": {
         "psr-4": {
             "panix\\mod\\sitemap\\": ""
