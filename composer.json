@@ -3,7 +3,7 @@
     "description": "Module sitemap",
     "keywords": ["corner-cms", "module", "sitemap"],
     "homepage": "https://github.com/andrtechno/mod-sitemap",
-    "type": "module",
+    "type": "yii2-extension",
     "license": "BSD 3-Clause",
     "authors": [
         {
