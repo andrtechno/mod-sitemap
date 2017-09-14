@@ -4,7 +4,8 @@
     "keywords": ["corner-cms", "module", "sitemap"],
     "homepage": "https://github.com/andrtechno/mod-sitemap",
     "type": "yii2-extension",
-    "license": "BSD 3-Clause",
+    "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "CORNER CMS",
