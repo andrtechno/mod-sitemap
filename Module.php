@@ -4,9 +4,9 @@ namespace panix\mod\sitemap;
 
 use Yii;
 use yii\db\Query;
-use yii\helpers\Url;
+use panix\engine\WebModule;
 
-class Module extends \panix\engine\WebModule {
+class Module extends WebModule {
 
     public $routes = [
         'sitemap.xml' => 'sitemap/default/index',
