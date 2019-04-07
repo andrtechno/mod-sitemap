@@ -1,6 +1,6 @@
 mod-sitemap
 ===========
-Module for sitemap.xml CORNER CMS
+Module for sitemap.xml Pixelion CMS
 
 [![Latest Stable Version](https://poser.pugx.org/panix/mod-sitemap/v/stable)](https://packagist.org/packages/panix/mod-sitemap) [![Total Downloads](https://poser.pugx.org/panix/mod-sitemap/downloads)](https://packagist.org/packages/panix/mod-sitemap) [![Monthly Downloads](https://poser.pugx.org/panix/mod-sitemap/d/monthly)](https://packagist.org/packages/panix/mod-sitemap) [![Daily Downloads](https://poser.pugx.org/panix/mod-sitemap/d/daily)](https://packagist.org/packages/panix/mod-sitemap) [![Latest Unstable Version](https://poser.pugx.org/panix/mod-sitemap/v/unstable)](https://packagist.org/packages/panix/mod-sitemap) [![License](https://poser.pugx.org/panix/mod-sitemap/license)](https://packagist.org/packages/panix/mod-sitemap)
 
