@@ -2,11 +2,20 @@
 
 namespace panix\mod\sitemap;
 
+use panix\mod\shop\models\Category;
+use panix\mod\shop\models\Manufacturer;
+use panix\mod\shop\models\Product;
 use Yii;
+use yii\base\BootstrapInterface;
+use yii\base\InvalidConfigException;
+use yii\caching\Cache;
 use yii\db\Query;
 use panix\engine\WebModule;
+use yii\helpers\Url;
 
-class Module extends WebModule {
+class Module extends WebModule implements BootstrapInterface
+{
+
 
     public $routes = [
         'sitemap.xml' => 'sitemap/default/index',
@@ -22,11 +31,139 @@ class Module extends WebModule {
      * @var array
      */
     protected $_urls = [];
+    public $controllerNamespace = 'panix\mod\sitemap\controllers';
+    /** @var int */
+    public $cacheExpire = 86400;
+    /** @var Cache|string */
+    public $cacheProvider = 'cache';
+    /** @var string */
+    public $cacheKey = 'sitemap';
+    /** @var boolean Use php's gzip compressing. */
+    public $enableGzip = false;
+    /** @var boolean */
+    public $enableGzipedCache = false;
+    /** @var array */
+    public $models = [];
+    /** @var array */
+    public $urls = [];
+
+    public function init()
+    {
+        parent::init();
+        if (is_string($this->cacheProvider)) {
+            $this->cacheProvider = Yii::$app->{$this->cacheProvider};
+        }
+        if (!$this->cacheProvider instanceof Cache) {
+            throw new InvalidConfigException('Invalid `cacheKey` parameter was specified.');
+        }
+    }
+    public function bootstrap($app)
+    {
+        $app->urlManager->addRules(
+            [
+                ['pattern' => 'robots1', 'route' => 'sitemap/default/robots-txt', 'suffix' => '.txt'],
+                ['pattern' => 'sitemap', 'route' => 'sitemap/default/index', 'suffix' => '.xml'],
+                ['pattern' => 'sitemap2', 'route' => 'sitemap/default/index2', 'suffix' => '.xml'],
+            ],
+            true
+        );
+
+        $app->setComponents([
+            'sitemap' => [
+                'class' => 'panix\mod\sitemap\Sitemap',
+                'models' => [
+                  //  'panix\mod\shop\models\Product',
+                    [
+                        'class' => 'panix\mod\shop\models\Product',
+                        'behaviors' => [
+                            'sitemap' => [
+                                'class' => '\panix\mod\sitemap\behaviors\SitemapBehavior',
+                                'scope' => function ($model) {
+                                    /** @var \yii\db\ActiveQuery $model */
+                                    $model->select(['seo_alias', 'updated_at']);
+                                    $model->andWhere(['switch' => 1]);
+                                },
+                                'dataClosure' => function ($model) {
+                                    /** @var self $model */
+                                    return [
+                                        'loc' => Url::to($model->getUrl(), true),
+                                        'lastmod' => $model->updated_at,
+                                        'changefreq' => \panix\mod\sitemap\Sitemap::DAILY,
+                                        'priority' => 0.8
+                                    ];
+                                }
+                            ],
+                        ],
+                    ],
+                ],
+                'urls' => [
+                    [
+                        'loc' => ['/news/default/index'],
+                        //'changefreq' => \app\modules\sitemap\Sitemap::DAILY,
+                        'priority' => 0.8,
+                        'news' => [
+                            'publication' => [
+                                'name' => 'Example Blog',
+                                'language' => 'en',
+                            ],
+                            'access' => 'Subscription',
+                            'genres' => 'Blog, UserGenerated',
+                            'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
+                            'title' => 'Example Title',
+                            'keywords' => 'example, keywords, comma-separated',
+                            'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
+                        ],
+                        'images' => [
+                            [
+                                'loc' => 'http://example.com/image.jpg',
+                                'caption' => 'This is an example of a caption of an image',
+                                'geo_location' => 'City, State',
+                                'title' => 'Example image',
+                                'license' => 'http://example.com/license',
+                            ],
+                        ],
+                    ],
+                ],
+                'enableGzip' => true, // default is false
+                'cacheExpire' => 1, // 1 second. Default is 24 hours,
+                'sortByPriority' => true, // default is false
+            ],
+        ]);
+
+        $app->setComponents([
+            'robotsTxt' => [
+                'class' => 'panix\mod\sitemap\RobotsTxt',
+                'userAgent' => [
+                    // Disallow url for all bots
+                    '*' => [
+                        'Disallow' => [
+                            ['/api/default/index'],
+                        ],
+                        'Allow' => [
+                            ['/api/doc/index'],
+                        ],
+                    ],
+                    // Block a specific image from Google Images
+                    'Googlebot-Image' => [
+                        'Disallow' => [
+                            // All images on your site from Google Images
+                            '/',
+                            // Files of a specific file type (for example, .gif)
+                            '/*.gif$',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+    }
+
 
     /**
      * @return array
      */
-    public function getUrls() {
+    public function getUrls()
+    {
         $this->loadProducts();
         $this->loadManufacturers();
         $this->loadCategories();
@@ -36,34 +173,37 @@ class Module extends WebModule {
     /**
      * Load products data
      */
-    public function loadProducts() {
+    public function loadProducts()
+    {
         $products = (new Query())
-                ->select(['seo_alias', 'date_create as date'])
-                ->from('{{%shop_product}}')
-                ->all();
+            ->select(['seo_alias', 'created_at as date'])
+            ->from(Product::tableName())
+            ->all();
         $this->populateUrls('/shop/default/view', $products);
     }
 
     /**
      * Load manufacturers data
      */
-    public function loadManufacturers() {
+    public function loadManufacturers()
+    {
         $records = (new Query())
-                ->select(['seo_alias'])
-                ->from('{{%shop_manufacturer}}')
-                ->all();
+            ->select(['seo_alias'])
+            ->from(Manufacturer::tableName())
+            ->all();
         $this->populateUrls('/shop/manufacturer/index', $records);
     }
 
     /**
      * Load categories data
      */
-    public function loadCategories() {
+    public function loadCategories()
+    {
         $records = (new Query())
-                ->select(['full_path as seo_alias'])
-                ->from('{{%shop_category}}')
-                ->where('id > 1')
-                ->all();
+            ->select(['full_path as seo_alias'])
+            ->from(Category::tableName())
+            ->where('id > 1')
+            ->all();
         $this->populateUrls('/shop/category/view', $records);
     }
 
@@ -75,7 +215,8 @@ class Module extends WebModule {
      * @param string $changefreq
      * @param string $priority
      */
-    public function populateUrls($route, $records, $changefreq = 'daily', $priority = '1.0') {
+    public function populateUrls($route, $records, $changefreq = 'daily', $priority = '1.0')
+    {
         foreach ($records as $p) {
             if (isset($p['seo_alias']) && !empty($p['seo_alias'])) {
                 $url = Yii::$app->urlManager->createAbsoluteUrl([$route, 'seo_alias' => $p['seo_alias']], true);
@@ -89,6 +230,38 @@ class Module extends WebModule {
                     $this->_urls[$url]['lastmod'] = date('Y-m-d', strtotime($p['date']));
             }
         }
+    }
+    /**
+     * Build and cache a site map.
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\base\InvalidParamException
+     */
+    public function buildSitemap()
+    {
+        $urls = $this->urls;
+        foreach ($this->models as $modelName) {
+            /** @var behaviors\SitemapBehavior|\yii\db\ActiveRecord $model */
+            if (is_array($modelName)) {
+                $model = new $modelName['class'];
+                if (isset($modelName['behaviors'])) {
+                    $model->attachBehaviors($modelName['behaviors']);
+                }
+            } else {
+                $model = new $modelName;
+            }
+            $urls = array_merge($urls, $model->generateSiteMap());
+        }
+        $sitemapData = $this->createControllerByID('default')->renderPartial('index', ['urls' => $urls]);
+        if ($this->enableGzipedCache) {
+            $sitemapData = gzencode($sitemapData);
+        }
+        $this->cacheProvider->set($this->cacheKey, $sitemapData, $this->cacheExpire);
+        return $sitemapData;
+    }
+    public function clearCache()
+    {
+        $this->cacheProvider->delete($this->cacheKey);
     }
 
 }
