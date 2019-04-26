@@ -8,21 +8,20 @@
  * @license http://opensource.org/licenses/MIT MIT
  */
 
-namespace app\modules\sitemap\console;
+namespace panix\mod\sitemap\console;
 
+use panix\engine\console\controllers\ConsoleController;
 use Yii;
-use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Console;
-
 
 /**
  * Generate sitemap for application
  *
  * @author Serge Larin <serge.larin@gmail.com>
- * @package app\modules\sitemap
+ * @package panix\mod\sitemap
  */
-class CreateController extends Controller
+class CreateController extends ConsoleController
 {
     /**
      * @inheritdoc
@@ -32,7 +31,7 @@ class CreateController extends Controller
     /**
      * @var string folder for sitemaps files
      */
-    public $rootDir = '@webroot';
+    public $rootDir = '@runtime';
 
     /**
      * @var string sitemap main file name
@@ -57,6 +56,25 @@ class CreateController extends Controller
     {
 
         $file = Yii::getAlias($this->rootDir.'/'.$this->sitemapFile);
+
+
+
+
+
+        $module = $this->module;
+
+        if (!$sitemapData = Yii::$app->cache->get('sitemap')) {
+            $sitemapData = Yii::$app->getModule('sitemap')->buildSitemap();
+        }
+
+
+
+
+        print_r($sitemapData);die;
+
+
+
+
         $this->stdout("Generate sitemap file.\n", Console::FG_GREEN);
         $this->stdout("Rendering sitemap...\n", Console::FG_GREEN);
         $sitemap = Yii::$app->sitemap->render();

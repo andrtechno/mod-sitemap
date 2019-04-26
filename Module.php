@@ -5,6 +5,7 @@ namespace panix\mod\sitemap;
 use panix\mod\shop\models\Category;
 use panix\mod\shop\models\Manufacturer;
 use panix\mod\shop\models\Product;
+use panix\mod\sitemap\behaviors\SitemapBehavior;
 use Yii;
 use yii\base\BootstrapInterface;
 use yii\base\InvalidConfigException;
@@ -17,9 +18,6 @@ class Module extends WebModule implements BootstrapInterface
 {
 
 
-    public $routes = [
-        'sitemap.xml' => 'sitemap/default/index',
-    ];
     public $icon = 'icon-sitemap';
 
     /**
@@ -33,7 +31,7 @@ class Module extends WebModule implements BootstrapInterface
     protected $_urls = [];
     public $controllerNamespace = 'panix\mod\sitemap\controllers';
     /** @var int */
-    public $cacheExpire = 86400;
+    public $cacheExpire = 1;//86400;
     /** @var Cache|string */
     public $cacheProvider = 'cache';
     /** @var string */
@@ -56,7 +54,42 @@ class Module extends WebModule implements BootstrapInterface
         if (!$this->cacheProvider instanceof Cache) {
             throw new InvalidConfigException('Invalid `cacheKey` parameter was specified.');
         }
+
+        $this->cacheExpire = 1;
+
+
+        $this->models = [
+            ['class' => 'panix\mod\shop\models\Product'],
+        ];
+        /*$this->urls = [
+            [
+                'loc' => ['/news/default/index'],
+                'priority' => 0.8,
+                'news' => [
+                    'publication' => [
+                        'name' => 'Example Blog',
+                        'language' => 'en',
+                    ],
+                    'access' => 'Subscription',
+                    'genres' => 'Blog, UserGenerated',
+                    'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
+                    'title' => 'Example Title',
+                    'keywords' => 'example, keywords, comma-separated',
+                    'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
+                ],
+                'images' => [
+                    [
+                        'loc' => 'http://example.com/image.jpg',
+                        'caption' => 'This is an example of a caption of an image',
+                        'geo_location' => 'City, State',
+                        'title' => 'Example image',
+                        'license' => 'http://example.com/license',
+                    ],
+                ],
+            ],
+        ];*/
     }
+
     public function bootstrap($app)
     {
         $app->urlManager->addRules(
@@ -68,67 +101,6 @@ class Module extends WebModule implements BootstrapInterface
             true
         );
 
-        $app->setComponents([
-            'sitemap' => [
-                'class' => 'panix\mod\sitemap\Sitemap',
-                'models' => [
-                  //  'panix\mod\shop\models\Product',
-                    [
-                        'class' => 'panix\mod\shop\models\Product',
-                        'behaviors' => [
-                            'sitemap' => [
-                                'class' => '\panix\mod\sitemap\behaviors\SitemapBehavior',
-                                'scope' => function ($model) {
-                                    /** @var \yii\db\ActiveQuery $model */
-                                    $model->select(['seo_alias', 'updated_at']);
-                                    $model->andWhere(['switch' => 1]);
-                                },
-                                'dataClosure' => function ($model) {
-                                    /** @var self $model */
-                                    return [
-                                        'loc' => Url::to($model->getUrl(), true),
-                                        'lastmod' => $model->updated_at,
-                                        'changefreq' => \panix\mod\sitemap\Sitemap::DAILY,
-                                        'priority' => 0.8
-                                    ];
-                                }
-                            ],
-                        ],
-                    ],
-                ],
-                'urls' => [
-                    [
-                        'loc' => ['/news/default/index'],
-                        //'changefreq' => \app\modules\sitemap\Sitemap::DAILY,
-                        'priority' => 0.8,
-                        'news' => [
-                            'publication' => [
-                                'name' => 'Example Blog',
-                                'language' => 'en',
-                            ],
-                            'access' => 'Subscription',
-                            'genres' => 'Blog, UserGenerated',
-                            'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
-                            'title' => 'Example Title',
-                            'keywords' => 'example, keywords, comma-separated',
-                            'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
-                        ],
-                        'images' => [
-                            [
-                                'loc' => 'http://example.com/image.jpg',
-                                'caption' => 'This is an example of a caption of an image',
-                                'geo_location' => 'City, State',
-                                'title' => 'Example image',
-                                'license' => 'http://example.com/license',
-                            ],
-                        ],
-                    ],
-                ],
-                'enableGzip' => true, // default is false
-                'cacheExpire' => 1, // 1 second. Default is 24 hours,
-                'sortByPriority' => true, // default is false
-            ],
-        ]);
 
         $app->setComponents([
             'robotsTxt' => [
@@ -231,6 +203,7 @@ class Module extends WebModule implements BootstrapInterface
             }
         }
     }
+
     /**
      * Build and cache a site map.
      * @return string
@@ -240,9 +213,13 @@ class Module extends WebModule implements BootstrapInterface
     public function buildSitemap()
     {
         $urls = $this->urls;
+
+
         foreach ($this->models as $modelName) {
             /** @var behaviors\SitemapBehavior|\yii\db\ActiveRecord $model */
             if (is_array($modelName)) {
+
+
                 $model = new $modelName['class'];
                 if (isset($modelName['behaviors'])) {
                     $model->attachBehaviors($modelName['behaviors']);
@@ -252,6 +229,7 @@ class Module extends WebModule implements BootstrapInterface
             }
             $urls = array_merge($urls, $model->generateSiteMap());
         }
+
         $sitemapData = $this->createControllerByID('default')->renderPartial('index', ['urls' => $urls]);
         if ($this->enableGzipedCache) {
             $sitemapData = gzencode($sitemapData);
@@ -259,6 +237,7 @@ class Module extends WebModule implements BootstrapInterface
         $this->cacheProvider->set($this->cacheKey, $sitemapData, $this->cacheExpire);
         return $sitemapData;
     }
+
     public function clearCache()
     {
         $this->cacheProvider->delete($this->cacheKey);

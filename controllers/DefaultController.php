@@ -31,6 +31,7 @@ class DefaultController extends Controller {
         if (!$sitemapData = $module->cacheProvider->get($module->cacheKey)) {
             $sitemapData = $module->buildSitemap();
         }
+
         Yii::$app->response->format = Response::FORMAT_RAW;
         $headers = Yii::$app->response->headers;
         $headers->add('Content-Type', 'application/xml');
@@ -43,6 +44,7 @@ class DefaultController extends Controller {
         } elseif ($module->enableGzipedCache) {
             $sitemapData = gzdecode($sitemapData);
         }
+
         return $sitemapData;
     }
 
