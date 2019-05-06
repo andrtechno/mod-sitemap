@@ -148,7 +148,7 @@ class Module extends WebModule implements BootstrapInterface
     public function loadProducts()
     {
         $products = (new Query())
-            ->select(['seo_alias', 'created_at as date'])
+            ->select(['slug', 'created_at as date'])
             ->from(Product::tableName())
             ->all();
         $this->populateUrls('/shop/default/view', $products);
@@ -160,7 +160,7 @@ class Module extends WebModule implements BootstrapInterface
     public function loadManufacturers()
     {
         $records = (new Query())
-            ->select(['seo_alias'])
+            ->select(['slug'])
             ->from(Manufacturer::tableName())
             ->all();
         $this->populateUrls('/shop/manufacturer/index', $records);
@@ -172,7 +172,7 @@ class Module extends WebModule implements BootstrapInterface
     public function loadCategories()
     {
         $records = (new Query())
-            ->select(['full_path as seo_alias'])
+            ->select(['full_path as slug'])
             ->from(Category::tableName())
             ->where('id > 1')
             ->all();
@@ -190,8 +190,8 @@ class Module extends WebModule implements BootstrapInterface
     public function populateUrls($route, $records, $changefreq = 'daily', $priority = '1.0')
     {
         foreach ($records as $p) {
-            if (isset($p['seo_alias']) && !empty($p['seo_alias'])) {
-                $url = Yii::$app->urlManager->createAbsoluteUrl([$route, 'seo_alias' => $p['seo_alias']], true);
+            if (isset($p['slug']) && !empty($p['slug'])) {
+                $url = Yii::$app->urlManager->createAbsoluteUrl([$route, 'slug' => $p['slug']], true);
 
                 $this->_urls[$url] = array(
                     'changefreq' => $changefreq,
