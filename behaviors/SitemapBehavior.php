@@ -2,6 +2,7 @@
 
 namespace panix\mod\sitemap\behaviors;
 
+use Yii;
 use yii\base\Behavior;
 use yii\base\InvalidConfigException;
 
@@ -89,7 +90,7 @@ class SitemapBehavior extends Behavior
             if (empty($urlData)) {
                 continue;
             }
-            $result[$n]['loc'] = $urlData['loc'];
+            $result[$n]['loc'] = Yii::$app->urlManager->createAbsoluteUrl($urlData['loc']);
             if (!empty($urlData['lastmod'])) {
                 $result[$n]['lastmod'] = $urlData['lastmod'];
             }
