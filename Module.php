@@ -60,8 +60,10 @@ class Module extends WebModule implements BootstrapInterface
 
         $this->models = [
             ['class' => 'panix\mod\shop\models\Product'],
+            ['class' => 'panix\mod\shop\models\Category'],
+            ['class' => 'panix\mod\pages\models\Pages'],
         ];
-        /*$this->urls = [
+        $this->urls = [
             [
                 'loc' => ['/news/default/index'],
                 'priority' => 0.8,
@@ -87,7 +89,7 @@ class Module extends WebModule implements BootstrapInterface
                     ],
                 ],
             ],
-        ];*/
+        ];
     }
 
     public function bootstrap($app)
@@ -102,7 +104,7 @@ class Module extends WebModule implements BootstrapInterface
         );
 
 
-        $app->setComponents([
+       /* $app->setComponents([
             'robotsTxt' => [
                 'class' => 'panix\mod\sitemap\RobotsTxt',
                 'userAgent' => [
@@ -126,7 +128,7 @@ class Module extends WebModule implements BootstrapInterface
                     ],
                 ],
             ],
-        ]);
+        ]);*/
 
     }
 
@@ -151,7 +153,7 @@ class Module extends WebModule implements BootstrapInterface
             ->select(['slug', 'created_at as date'])
             ->from(Product::tableName())
             ->all();
-        $this->populateUrls('/shop/default/view', $products);
+        $this->populateUrls('/shop/product/view', $products);
     }
 
     /**
@@ -176,7 +178,7 @@ class Module extends WebModule implements BootstrapInterface
             ->from(Category::tableName())
             ->where('id > 1')
             ->all();
-        $this->populateUrls('/shop/category/view', $records);
+        $this->populateUrls('/shop/catalog/view', $records);
     }
 
     /**
@@ -193,10 +195,10 @@ class Module extends WebModule implements BootstrapInterface
             if (isset($p['slug']) && !empty($p['slug'])) {
                 $url = Yii::$app->urlManager->createAbsoluteUrl([$route, 'slug' => $p['slug']], true);
 
-                $this->_urls[$url] = array(
+                $this->_urls[$url] = [
                     'changefreq' => $changefreq,
                     'priority' => $priority
-                );
+                ];
 
                 if (isset($p['date']) && strtotime($p['date']))
                     $this->_urls[$url]['lastmod'] = date('Y-m-d', strtotime($p['date']));

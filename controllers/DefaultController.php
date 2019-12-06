@@ -1,4 +1,5 @@
 <?php
+
 namespace panix\mod\sitemap\controllers;
 
 use Yii;
@@ -7,7 +8,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use panix\mod\sitemap\RobotsTxt;
 
-class DefaultController extends Controller {
+class DefaultController extends Controller
+{
 
 
     public function behaviors2()
@@ -23,8 +25,7 @@ class DefaultController extends Controller {
     }
 
 
-
-    public function actionIndex2()
+    public function actionIndex()
     {
 
         $module = $this->module;
@@ -53,32 +54,33 @@ class DefaultController extends Controller {
      *
      * @access public
      * @return string
-     */
+
     public function actionRobotsTxt()
-    {
-        $robotsTxt = empty(Yii::$app->components['robotsTxt']) ? new RobotsTxt() : Yii::$app->robotsTxt;
-        $robotsTxt->sitemap = Yii::$app->urlManager->createAbsoluteUrl(
-            empty($robotsTxt->sitemap) ? [$this->module->id.'/'.$this->id.'/index'] : $robotsTxt->sitemap
-        );
-        Yii::$app->response->format = Response::FORMAT_RAW;
-        Yii::$app->response->headers->add('Content-Type', 'text/plain');
-        return $robotsTxt->render();
-    }
+     * {
+     * $robotsTxt = empty(Yii::$app->components['robotsTxt']) ? new RobotsTxt() : Yii::$app->robotsTxt;
+     * $robotsTxt->sitemap = Yii::$app->urlManager->createAbsoluteUrl(
+     * empty($robotsTxt->sitemap) ? [$this->module->id.'/'.$this->id.'/index'] : $robotsTxt->sitemap
+     * );
+     * Yii::$app->response->format = Response::FORMAT_RAW;
+     * Yii::$app->response->headers->add('Content-Type', 'text/plain');
+     * return $robotsTxt->render();
+     * }*/
 
     /**
      * Render sitemap.xml
      */
-    public function actionIndex() {
+    public function actionIndex2()
+    {
         $cacheKey = 'sitemap.xml.cache';
         $data = Yii::$app->cache->get($cacheKey);
 
         if (!$data) {
 
-            $data = $this->renderPartial('index', array(
+            $data = $this->renderPartial('index', [
                 'urls' => Yii::$app->getModule('sitemap')->getUrls()
-                    ), true);
+            ]);
 
-            Yii::$app->cache->set($cacheKey, $data, 3200*12);
+            Yii::$app->cache->set($cacheKey, $data, 3200 * 12);
         }
 
         if (!headers_sent())

@@ -4,7 +4,7 @@
  */
 echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
 
-
+//\panix\engine\CMS::dump($urls);die;
 
 ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
