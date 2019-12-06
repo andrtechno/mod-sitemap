@@ -12,7 +12,7 @@ class DefaultController extends Controller
 {
 
 
-    public function behaviors2()
+    public function behaviors()
     {
         return [
             'pageCache' => [
