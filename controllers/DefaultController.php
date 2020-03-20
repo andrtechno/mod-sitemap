@@ -18,7 +18,7 @@ class DefaultController extends Controller
             'pageCache' => [
                 'class' => 'yii\filters\PageCache',
                 'only' => ['index', 'robots-txt'],
-                'duration' => Yii::$app->sitemap->cacheExpire,
+                'duration' => 86400*7,
                 'variations' => [Yii::$app->request->get('id')],
             ],
         ];
@@ -80,7 +80,7 @@ class DefaultController extends Controller
                 'urls' => Yii::$app->getModule('sitemap')->getUrls()
             ]);
 
-            Yii::$app->cache->set($cacheKey, $data, 3200 * 12);
+            Yii::$app->cache->set($cacheKey, $data, 86400*7);
         }
 
         if (!headers_sent())
