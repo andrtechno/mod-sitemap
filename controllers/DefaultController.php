@@ -4,9 +4,7 @@ namespace panix\mod\sitemap\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use panix\mod\sitemap\RobotsTxt;
 
 class DefaultController extends Controller
 {
