@@ -12,7 +12,7 @@ class DefaultController extends Controller
 {
 
 
-    public function behaviors()
+    public function behaviors2()
     {
         return [
             'pageCache' => [
@@ -24,11 +24,13 @@ class DefaultController extends Controller
         ];
     }
 
-
-    public function actionIndex()
+    public function actionHtml()
     {
+        die('zz');
+    }
 
-       // die('zz');
+    public function actionXml()
+    {
         $module = $this->module;
         if (!$sitemapData = $module->cacheProvider->get($module->cacheKey)) {
             $sitemapData = $module->buildSitemap();
@@ -49,23 +51,6 @@ class DefaultController extends Controller
 
         return $sitemapData;
     }
-
-    /**
-     * Action for sitemap/default/robot-txt
-     *
-     * @access public
-     * @return string
-
-    public function actionRobotsTxt()
-     * {
-     * $robotsTxt = empty(Yii::$app->components['robotsTxt']) ? new RobotsTxt() : Yii::$app->robotsTxt;
-     * $robotsTxt->sitemap = Yii::$app->urlManager->createAbsoluteUrl(
-     * empty($robotsTxt->sitemap) ? [$this->module->id.'/'.$this->id.'/index'] : $robotsTxt->sitemap
-     * );
-     * Yii::$app->response->format = Response::FORMAT_RAW;
-     * Yii::$app->response->headers->add('Content-Type', 'text/plain');
-     * return $robotsTxt->render();
-     * }*/
 
     /**
      * Render sitemap.xml

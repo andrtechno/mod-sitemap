@@ -63,7 +63,7 @@ class Module extends WebModule implements BootstrapInterface
             ['class' => 'panix\mod\shop\models\Category'],
             ['class' => 'panix\mod\pages\models\Pages'],
         ];
-        $this->urls = [
+       /* $this->urls = [
             [
                 'loc' => ['/news/default/index'],
                 'priority' => 0.8,
@@ -89,7 +89,7 @@ class Module extends WebModule implements BootstrapInterface
                     ],
                 ],
             ],
-        ];
+        ];*/
     }
 
     public function bootstrap($app)
@@ -97,8 +97,8 @@ class Module extends WebModule implements BootstrapInterface
         $app->urlManager->addRules(
             [
               //  ['pattern' => 'robots1', 'route' => 'sitemap/default/robots-txt', 'suffix' => '.txt'],
-                ['pattern' => 'sitemap', 'route' => 'sitemap/default/index', 'suffix' => '.xml'],
-                ['pattern' => 'sitemap2', 'route' => 'sitemap/default/index2', 'suffix' => '.xml'],
+                ['pattern' => 'sitemap', 'route' => 'sitemap/default/xml', 'suffix' => '.xml'],
+                ['pattern' => 'sitemap', 'route' => 'sitemap/default/html'],
             ],
             true
         );
@@ -115,7 +115,7 @@ class Module extends WebModule implements BootstrapInterface
                         'class' => 'app\modules\news\models\News',
                         'behaviors' => [
                             'sitemap' => [
-                                'class' => '\app\modules\sitemap\behaviors\SitemapBehavior',
+                                'class' => '\panix\mod\sitemap\behaviors\SitemapBehavior',
                                 'scope' => function ($model) {
 
                                     $model->select(['url', 'lastmod']);
@@ -134,7 +134,7 @@ class Module extends WebModule implements BootstrapInterface
                         ],
                     ],*/
                 ],
-                'urls' => [
+                /*'urls' => [
                     // your additional urls
                     [
                         'loc' => ['/news/default/index'],
@@ -162,7 +162,7 @@ class Module extends WebModule implements BootstrapInterface
                             ],
                         ],
                     ],
-                ],
+                ],*/
                 'enableGzip' => true, // default is false
                 'cacheExpire' => 1, // 1 second. Default is 24 hours,
                 'sortByPriority' => true, // default is false
