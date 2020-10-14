@@ -59,7 +59,7 @@ class Module extends WebModule implements BootstrapInterface
 
 
         $this->models = [
-            ['class' => 'panix\mod\shop\models\Product'],
+            //['class' => 'panix\mod\shop\models\Product'],
             ['class' => 'panix\mod\shop\models\Category'],
             ['class' => 'panix\mod\pages\models\Pages'],
         ];
@@ -96,7 +96,7 @@ class Module extends WebModule implements BootstrapInterface
     {
         $app->urlManager->addRules(
             [
-                ['pattern' => 'robots1', 'route' => 'sitemap/default/robots-txt', 'suffix' => '.txt'],
+              //  ['pattern' => 'robots1', 'route' => 'sitemap/default/robots-txt', 'suffix' => '.txt'],
                 ['pattern' => 'sitemap', 'route' => 'sitemap/default/index', 'suffix' => '.xml'],
                 ['pattern' => 'sitemap2', 'route' => 'sitemap/default/index2', 'suffix' => '.xml'],
             ],
@@ -104,31 +104,71 @@ class Module extends WebModule implements BootstrapInterface
         );
 
 
-       /* $app->setComponents([
-            'robotsTxt' => [
-                'class' => 'panix\mod\sitemap\RobotsTxt',
-                'userAgent' => [
-                    // Disallow url for all bots
-                    '*' => [
-                        'Disallow' => [
-                            ['/api/default/index'],
+        $app->setComponents([
+            'sitemap' => [
+                'class' => 'panix\mod\sitemap\components\Sitemap',
+                'models' => [
+                    // your models
+                    'panix\mod\news\models\News',
+                    // or configuration for creating a behavior
+                    /*[
+                        'class' => 'app\modules\news\models\News',
+                        'behaviors' => [
+                            'sitemap' => [
+                                'class' => '\app\modules\sitemap\behaviors\SitemapBehavior',
+                                'scope' => function ($model) {
+
+                                    $model->select(['url', 'lastmod']);
+                                    $model->andWhere(['is_deleted' => 0]);
+                                },
+                                'dataClosure' => function ($model) {
+
+                                    return [
+                                        'loc' => \yii\helpers\Url::to($model->url, true),
+                                        'lastmod' => strtotime($model->lastmod),
+                                        'changefreq' => \panix\mod\sitemap\Module::DAILY,
+                                        'priority' => 0.8
+                                    ];
+                                }
+                            ],
                         ],
-                        'Allow' => [
-                            ['/api/doc/index'],
+                    ],*/
+                ],
+                'urls' => [
+                    // your additional urls
+                    [
+                        'loc' => ['/news/default/index'],
+                        //'changefreq' => panix\mod\sitemap\components\Sitemap::DAILY,
+                        'priority' => 0.8,
+                        'news' => [
+                            'publication' => [
+                                'name' => 'Example Blog',
+                                'language' => 'en',
+                            ],
+                            'access' => 'Subscription',
+                            'genres' => 'Blog, UserGenerated',
+                            'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
+                            'title' => 'Example Title',
+                            'keywords' => 'example, keywords, comma-separated',
+                            'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
                         ],
-                    ],
-                    // Block a specific image from Google Images
-                    'Googlebot-Image' => [
-                        'Disallow' => [
-                            // All images on your site from Google Images
-                            '/',
-                            // Files of a specific file type (for example, .gif)
-                            '/*.gif$',
+                        'images' => [
+                            [
+                                'loc' => 'http://example.com/image.jpg',
+                                'caption' => 'This is an example of a caption of an image',
+                                'geo_location' => 'City, State',
+                                'title' => 'Example image',
+                                'license' => 'http://example.com/license',
+                            ],
                         ],
                     ],
                 ],
+                'enableGzip' => true, // default is false
+                'cacheExpire' => 1, // 1 second. Default is 24 hours,
+                'sortByPriority' => true, // default is false
             ],
-        ]);*/
+        ]);
+
 
     }
 
@@ -152,6 +192,7 @@ class Module extends WebModule implements BootstrapInterface
         $products = (new Query())
             ->select(['slug', 'created_at as date'])
             ->from(Product::tableName())
+            ->where(['switch' => 1])
             ->all();
         $this->populateUrls('/shop/product/view', $products);
     }
@@ -164,6 +205,7 @@ class Module extends WebModule implements BootstrapInterface
         $records = (new Query())
             ->select(['slug'])
             ->from(Manufacturer::tableName())
+            ->where(['switch' => 1])
             ->all();
         $this->populateUrls('/shop/manufacturer/index', $records);
     }

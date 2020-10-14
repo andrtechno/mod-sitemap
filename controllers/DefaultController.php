@@ -2,6 +2,8 @@
 
 namespace panix\mod\sitemap\controllers;
 
+use panix\engine\CMS;
+use panix\mod\sitemap\components\RobotsTxt;
 use Yii;
 use yii\web\Controller;
 use yii\web\Response;
@@ -15,7 +17,7 @@ class DefaultController extends Controller
         return [
             'pageCache' => [
                 'class' => 'yii\filters\PageCache',
-                'only' => ['index', 'robots-txt'],
+                'only' => ['index'], //, 'robots-txt'
                 'duration' => 86400*7,
                 'variations' => [Yii::$app->request->get('id')],
             ],
@@ -26,6 +28,7 @@ class DefaultController extends Controller
     public function actionIndex()
     {
 
+       // die('zz');
         $module = $this->module;
         if (!$sitemapData = $module->cacheProvider->get($module->cacheKey)) {
             $sitemapData = $module->buildSitemap();
@@ -86,5 +89,6 @@ class DefaultController extends Controller
 
         echo $data;
     }
+
 
 }

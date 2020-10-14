@@ -1,14 +1,11 @@
 <?php
 /**
- * CreateController for sitemap module
+ * CreateController
  *
  * @link https://github.com/assayer-pro/yii2-sitemap-module
- * @author Serge Larin <serge.larin@gmail.com>
- * @copyright 2015 Assayer Pro Company
- * @license http://opensource.org/licenses/MIT MIT
  */
 
-namespace panix\mod\sitemap\console;
+namespace panix\mod\sitemap\commands;
 
 use panix\engine\console\controllers\ConsoleController;
 use Yii;
@@ -18,7 +15,6 @@ use yii\helpers\Console;
 /**
  * Generate sitemap for application
  *
- * @author Serge Larin <serge.larin@gmail.com>
  * @package panix\mod\sitemap
  */
 class CreateController extends ConsoleController
@@ -61,16 +57,16 @@ class CreateController extends ConsoleController
 
 
 
-        $module = $this->module;
+     //   $module = $this->module;
 
-        if (!$sitemapData = Yii::$app->cache->get('sitemap')) {
-            $sitemapData = Yii::$app->getModule('sitemap')->buildSitemap();
-        }
-
-
+        //if (!$sitemapData = Yii::$app->cache->get('sitemap')) {
+        //    $sitemapData = Yii::$app->getModule('sitemap')->buildSitemap();
+       // }
 
 
-        print_r($sitemapData);die;
+
+
+       // print_r($sitemapData);die;
 
 
 
