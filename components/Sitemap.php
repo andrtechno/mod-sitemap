@@ -6,6 +6,7 @@
 
 namespace panix\mod\sitemap\components;
 
+use panix\engine\CMS;
 use Yii;
 use XMLWriter;
 use yii\base\InvalidConfigException;
@@ -24,6 +25,7 @@ class Sitemap extends \yii\base\Component
     const MONTHLY = 'monthly';
     const YEARLY = 'yearly';
     const NEVER = 'never';
+
     private $schemas = [
         'xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9',
         'xmlns:image' => 'http://www.google.com/schemas/sitemap-image/1.1',
@@ -160,6 +162,7 @@ class Sitemap extends \yii\base\Component
             }
             $this->renderedUrls = array_merge($this->renderedUrls, $model->generateSiteMap());
         }
+      //  print_r($this->renderedUrls);die;
         $this->renderedUrls = array_map(function ($item) {
             $item['loc'] = Url::to($item['loc'], true);
             if (isset($item['lastmod'])) {

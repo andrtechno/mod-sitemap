@@ -57,6 +57,8 @@ class SitemapBehavior extends Behavior
     public $defaultPriority = false;
     /** @var callable */
     public $scope;
+    /** @var string */
+    public $groupName;
 
     public function init()
     {
@@ -99,6 +101,9 @@ class SitemapBehavior extends Behavior
             } elseif ($this->defaultChangefreq !== false) {
                 $result[$n]['changefreq'] = $this->defaultChangefreq;
             }
+            if (isset($urlData['name'])) {
+                $result[$n]['name'] = $urlData['name'];
+            }
             if (isset($urlData['priority'])) {
                 $result[$n]['priority'] = $urlData['priority'];
             } elseif ($this->defaultPriority !== false) {
@@ -113,6 +118,69 @@ class SitemapBehavior extends Behavior
 
             if (isset($urlData['xhtml:link'])) {
                 $result[$n]['xhtml:link'] = $urlData['xhtml:link'];
+            }
+            ++$n;
+        }
+        return $result;
+    }
+
+
+    public function generateSiteMapHtml()
+    {
+        $result = [];
+        $n = 0;
+        /** @var \yii\db\ActiveRecord $owner */
+        $owner = $this->owner;
+        $query = $owner::find();
+        if (is_array($this->scope)) {
+            if (is_callable($this->owner->{$this->scope[1]}())) {
+                call_user_func($this->owner->{$this->scope[1]}(), $query);
+            }
+        } else {
+            if (is_callable($this->scope)) {
+                call_user_func($this->scope, $query);
+            }
+        }
+
+        //  $className2=get_class($owner);
+        $className = $this->groupName;
+
+        foreach ($query->each(self::BATCH_MAX_SIZE) as $model) {
+            if (is_array($this->dataClosure)) {
+                $urlData = call_user_func($this->owner->{$this->dataClosure[1]}(), $model);
+            } else {
+                $urlData = call_user_func($this->dataClosure, $model);
+            }
+            if (empty($urlData)) {
+                continue;
+            }
+
+            $result[$className][$n]['loc'] = Yii::$app->urlManager->createAbsoluteUrl($urlData['loc']);
+            if (!empty($urlData['lastmod'])) {
+                $result[$className][$n]['lastmod'] = $urlData['lastmod'];
+            }
+            if (isset($urlData['changefreq'])) {
+                $result[$className][$n]['changefreq'] = $urlData['changefreq'];
+            } elseif ($this->defaultChangefreq !== false) {
+                $result[$className][$n]['changefreq'] = $this->defaultChangefreq;
+            }
+            if (isset($urlData['name'])) {
+                $result[$className][$n]['name'] = $urlData['name'];
+            }
+            if (isset($urlData['priority'])) {
+                $result[$className][$n]['priority'] = $urlData['priority'];
+            } elseif ($this->defaultPriority !== false) {
+                $result[$className][$n]['priority'] = $this->defaultPriority;
+            }
+            if (isset($urlData['news'])) {
+                $result[$className][$n]['news'] = $urlData['news'];
+            }
+            if (isset($urlData['images'])) {
+                $result[$className][$n]['images'] = $urlData['images'];
+            }
+
+            if (isset($urlData['xhtml:link'])) {
+                $result[$className][$n]['xhtml:link'] = $urlData['xhtml:link'];
             }
             ++$n;
         }

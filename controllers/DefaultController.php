@@ -4,11 +4,11 @@ namespace panix\mod\sitemap\controllers;
 
 use panix\engine\CMS;
 use panix\mod\sitemap\components\RobotsTxt;
+use panix\engine\controllers\WebController;
 use Yii;
-use yii\web\Controller;
 use yii\web\Response;
 
-class DefaultController extends Controller
+class DefaultController extends WebController
 {
 
 
@@ -18,7 +18,7 @@ class DefaultController extends Controller
             'pageCache' => [
                 'class' => 'yii\filters\PageCache',
                 'only' => ['index'], //, 'robots-txt'
-                'duration' => 86400*7,
+                'duration' => 86400 * 7,
                 'variations' => [Yii::$app->request->get('id')],
             ],
         ];
@@ -26,7 +26,27 @@ class DefaultController extends Controller
 
     public function actionHtml()
     {
-        die('zz');
+        $this->pageName = Yii::t('sitemap/default', 'MODULE_NAME');
+        $this->view->params['breadcrumbs'][] = $this->pageName;
+
+        $module = $this->module;
+        $urls = $module->urls;
+        foreach ($module->models as $k => $modelName) {
+            /** @var behaviors\SitemapBehavior|\yii\db\ActiveRecord $model */
+            if (is_array($modelName)) {
+
+
+                $model = new $modelName['class'];
+                if (isset($modelName['behaviors'])) {
+                    $model->attachBehaviors($modelName['behaviors']);
+                }
+            } else {
+                $model = new $modelName;
+            }
+            $urls = array_merge($urls, $model->generateSiteMapHtml());
+        }
+
+        return $this->render('html', ['data' => $urls]);
     }
 
     public function actionXml()
@@ -62,11 +82,11 @@ class DefaultController extends Controller
 
         if (!$data) {
 
-            $data = $this->renderPartial('index', [
+            $data = $this->renderPartial('xml', [
                 'urls' => Yii::$app->getModule('sitemap')->getUrls()
             ]);
 
-            Yii::$app->cache->set($cacheKey, $data, 86400*7);
+            Yii::$app->cache->set($cacheKey, $data, 86400 * 7);
         }
 
         if (!headers_sent())

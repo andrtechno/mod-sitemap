@@ -274,7 +274,7 @@ class Module extends WebModule implements BootstrapInterface
             $urls = array_merge($urls, $model->generateSiteMap());
         }
 
-        $sitemapData = $this->createControllerByID('default')->renderPartial('index', ['urls' => $urls]);
+        $sitemapData = $this->createControllerByID('default')->renderPartial('xml', ['urls' => $urls]);
         if ($this->enableGzipedCache) {
             $sitemapData = gzencode($sitemapData);
         }
