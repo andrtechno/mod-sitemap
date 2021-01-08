@@ -6,7 +6,7 @@ use panix\mod\shop\models\Category;
 
 
 $s =Category::find()->dataTree();
-\panix\engine\CMS::dump($s);
+//\panix\engine\CMS::dump($s);
 ?>
 
 <h1><?= $this->context->pageName; ?></h1>
