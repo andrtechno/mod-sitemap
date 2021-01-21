@@ -15,9 +15,17 @@ $s =Category::find()->dataTree();
         <div class="col-sm-6">
             <h2><?= $k; ?></h2>
             <ul>
-                <?php foreach ($group as $group2 => $item) { ?>
+                <?php foreach ($group as $item) { ?>
                     <li><?php echo Html::a($item['name'], $item['loc']); ?></li>
                 <?php } ?>
+                <?php if($k == 'Страницы'){?>
+                    <li><?php echo Html::a(Yii::t('default', 'BLOG'), ['/news/default/index']); ?></li>
+                <?php } ?>
+            </ul>
+            <ul>
+
+
+
             </ul>
         </div>
     <?php } ?>
