@@ -3,7 +3,7 @@
     "description": "Module sitemap",
     "keywords": ["pixelion-cms", "module", "sitemap"],
     "homepage": "https://github.com/andrtechno/mod-sitemap",
-    "type": "yii2-extension",
+    "type": "pixelion-module",
     "license": "MIT",
     "minimum-stability": "dev",
     "authors": [
