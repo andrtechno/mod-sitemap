@@ -1,8 +1,4 @@
 <?php
-/**
- * Yii2 module for automatically generating XML Sitemap.
- * based on https://github.com/himiklab/yii2-sitemap-module
- */
 
 namespace panix\mod\sitemap\components;
 
@@ -14,7 +10,7 @@ use yii\caching\Cache;
 use yii\helpers\Url;
 
 /**
- * Yii2 module for automatically generating XML Sitemap.
+ * automatically generating XML Sitemap.
  */
 class Sitemap extends \yii\base\Component
 {
