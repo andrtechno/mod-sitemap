@@ -82,14 +82,16 @@ class Sitemap extends \yii\base\Component
             $xml->writeAttribute('xmlns', $this->schemas['xmlns']);
             for ($i = 1; $i <= $parts; $i++) {
                 $xml->startElement('sitemap');
-                $xml->writeElement('loc', Url::to(['/sitemap/default/index', 'id' => $i], true));
+                //$xml->writeElement('loc', Url::to(['/sitemap/default/xml', 'id' => $i], true));
+                $xml->writeElement('loc', Url::to('uploads/sitemap-'.$i.'.xml', true));
                 $xml->writeElement('lastmod', static::dateToW3C(time()));
                 $xml->endElement();
-                $result[$i]['file'] = Url::to(['/sitemap/default/index', 'id' => $i], false);
+                // $result[$i]['file'] = Url::to(['/sitemap/default/index', 'id' => $i], false);
+                $result[$i]['file'] = 'sitemap-'.$i.'.xml';
             }
             $xml->endElement();
             $result[0]['xml'] = $xml->outputMemory();
-            $result[0]['file'] = Url::to(['/sitemap/default/index']);
+            $result[0]['file'] = 'sitemap.xml';
         }
         $urlItem = 0;
         for ($i = 1; $i <= $parts; $i++) {
