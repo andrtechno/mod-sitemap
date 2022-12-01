@@ -22,7 +22,7 @@ class Sitemap extends \yii\base\Component
     const YEARLY = 'yearly';
     const NEVER = 'never';
 
-    private $schemas = [
+    public $schemas = [
         'xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9',
         'xmlns:image' => 'http://www.google.com/schemas/sitemap-image/1.1',
         'xmlns:news' => 'http://www.google.com/schemas/sitemap-news/0.9',
@@ -32,7 +32,7 @@ class Sitemap extends \yii\base\Component
      * @var mixed renderedUrls
      * @access private
      */
-    private $renderedUrls = [];
+    public $renderedUrls = [];
 
     /** @var int Cache expiration time */
     public $cacheExpire = 86400;
@@ -50,7 +50,7 @@ class Sitemap extends \yii\base\Component
     public $urls = [];
 
     /** @var int */
-    public $maxSectionUrl = 20000;
+    public $maxSectionUrl = 10000;
 
     /** @var bool Sort urls by priority. Top priority urls first */
     public $sortByPriority = false;
@@ -59,8 +59,9 @@ class Sitemap extends \yii\base\Component
      * Build site map.
      * @return array
      */
-    public function render()
+    public function queue()
     {
+
         $result = Yii::$app->cache->get($this->cacheKey);
         if ($result) {
             return $result;
@@ -69,7 +70,64 @@ class Sitemap extends \yii\base\Component
         if ($this->sortByPriority) {
             $this->sortUrlsByPriority();
         }
+
         $parts = ceil(count($this->renderedUrls) / $this->maxSectionUrl);
+
+        if ($parts > 1) {
+            $xml = new XMLWriter();
+            //$xml->preserveWhiteSpace = true;
+            //$xml->formatOutput = true;
+            $xml->openMemory();
+            $xml->startDocument('1.0', 'UTF-8');
+            $xml->startElement('sitemapindex');
+            $xml->writeAttribute('xmlns', $this->schemas['xmlns']);
+            for ($i = 1; $i <= $parts; $i++) {
+                $xml->startElement('sitemap');
+                $xml->writeElement('loc', Url::to('uploads/sitemap-' . $i . '.xml', true));
+                $xml->writeElement('lastmod', static::dateToW3C(time()));
+                $xml->endElement();
+                $result[$i]['file'] = 'sitemap-' . $i . '.xml';
+            }
+            $xml->endElement();
+            $result[0]['xml'] = $xml->outputMemory();
+            $result[0]['file'] = 'sitemap.xml';
+        }
+        $result2 = $result;
+
+        unset($result2[0]);
+        for ($i = 1; $i <= $parts; $i++) {
+            Yii::$app->queue->push(new SitemapQueue([
+                'i' => $i,
+                'result'=>$result2,
+                'renderedUrls' => $this->renderedUrls
+            ]));
+        }
+
+
+        if ($parts == 1) {
+            $result[0] = $result[1];
+            unset($result[1]);
+        }
+
+        Yii::$app->cache->set($this->cacheKey, $result, $this->cacheExpire);
+        return $result;
+    }
+
+
+    public function render()
+    {
+
+        $result = Yii::$app->cache->get($this->cacheKey);
+        if ($result) {
+            return $result;
+        }
+        $this->generateUrls();
+        if ($this->sortByPriority) {
+            $this->sortUrlsByPriority();
+        }
+
+        $parts = ceil(count($this->renderedUrls) / $this->maxSectionUrl);
+
         if ($parts > 1) {
             $xml = new XMLWriter();
             $xml->openMemory();
@@ -79,17 +137,18 @@ class Sitemap extends \yii\base\Component
             for ($i = 1; $i <= $parts; $i++) {
                 $xml->startElement('sitemap');
                 //$xml->writeElement('loc', Url::to(['/sitemap/default/xml', 'id' => $i], true));
-                $xml->writeElement('loc', Url::to('uploads/sitemap-'.$i.'.xml', true));
+                $xml->writeElement('loc', Url::to('uploads/sitemap-' . $i . '.xml', true));
                 $xml->writeElement('lastmod', static::dateToW3C(time()));
                 $xml->endElement();
                 // $result[$i]['file'] = Url::to(['/sitemap/default/index', 'id' => $i], false);
-                $result[$i]['file'] = 'sitemap-'.$i.'.xml';
+                $result[$i]['file'] = 'sitemap-' . $i . '.xml';
             }
             $xml->endElement();
             $result[0]['xml'] = $xml->outputMemory();
             $result[0]['file'] = 'sitemap.xml';
         }
         $urlItem = 0;
+
         for ($i = 1; $i <= $parts; $i++) {
             $xml = new XMLWriter();
             $xml->openMemory();
@@ -138,13 +197,14 @@ class Sitemap extends \yii\base\Component
         return $result;
     }
 
+
     /**
      * Generate url's array from properties $url and $models
      *
      * @access protected
      * @return array
      */
-    protected function generateUrls()
+    public function generateUrls()
     {
         $this->renderedUrls = $this->urls;
 
@@ -160,7 +220,7 @@ class Sitemap extends \yii\base\Component
             }
             $this->renderedUrls = array_merge($this->renderedUrls, $model->generateSiteMap());
         }
-      //  print_r($this->renderedUrls);die;
+
         $this->renderedUrls = array_map(function ($item) {
             $item['loc'] = Url::to($item['loc'], true);
             if (isset($item['lastmod'])) {
@@ -176,6 +236,7 @@ class Sitemap extends \yii\base\Component
         }, $this->renderedUrls);
     }
 
+
     /**
      * Convert associative arrays to XML
      *
@@ -186,7 +247,7 @@ class Sitemap extends \yii\base\Component
      * @access protected
      * @return XMLWriter
      */
-    protected static function hashToXML($hash, $xml, $namespace = '')
+    public static function hashToXML($hash, $xml, $namespace = '')
     {
         foreach ($hash as $key => $value) {
             $xml->startElement($namespace . $key);
@@ -220,7 +281,7 @@ class Sitemap extends \yii\base\Component
     /**
      * @return mixed
      */
-    protected function sortUrlsByPriority()
+    public function sortUrlsByPriority()
     {
         usort($this->renderedUrls, function ($urlA, $urlB) {
             if (!isset($urlA['priority'])) {
