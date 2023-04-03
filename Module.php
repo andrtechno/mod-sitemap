@@ -109,7 +109,7 @@ class Module extends WebModule implements BootstrapInterface
                 'class' => 'panix\mod\sitemap\components\Sitemap',
                 'models' => [
                     // your models
-                    'panix\mod\news\models\News',
+                    //'panix\mod\news\models\News',
                     // or configuration for creating a behavior
                     /*[
                         'class' => 'app\modules\news\models\News',
