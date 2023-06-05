@@ -50,7 +50,7 @@ class Sitemap extends \yii\base\Component
     public $urls = [];
 
     /** @var int */
-    public $maxSectionUrl = 10000;
+    public $maxSectionUrl = 5000;
 
     /** @var bool Sort urls by priority. Top priority urls first */
     public $sortByPriority = false;
@@ -216,8 +216,14 @@ class Sitemap extends \yii\base\Component
                 if (isset($modelName['behaviors'])) {
                     $model->attachBehaviors($modelName['behaviors']);
                 }
+
             } else {
                 $model = new $modelName;
+
+                $diffs = array_diff(array_keys($model['behaviors']),['sitemap','timestamp','tree']);
+                foreach ($diffs as $diff){
+                    $model->detachBehavior($diff);
+                }
             }
             $this->renderedUrls = array_merge($this->renderedUrls, $model->generateSiteMap());
         }
