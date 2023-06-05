@@ -56,40 +56,6 @@ class Module extends WebModule implements BootstrapInterface
         }
 
         $this->cacheExpire = 1;
-
-
-        $this->models = [
-            //['class' => 'panix\mod\shop\models\Product'],
-            ['class' => 'panix\mod\shop\models\Category'],
-            ['class' => 'panix\mod\pages\models\Pages'],
-        ];
-       /* $this->urls = [
-            [
-                'loc' => ['/news/default/index'],
-                'priority' => 0.8,
-                'news' => [
-                    'publication' => [
-                        'name' => 'Example Blog',
-                        'language' => 'en',
-                    ],
-                    'access' => 'Subscription',
-                    'genres' => 'Blog, UserGenerated',
-                    'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
-                    'title' => 'Example Title',
-                    'keywords' => 'example, keywords, comma-separated',
-                    'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
-                ],
-                'images' => [
-                    [
-                        'loc' => 'http://example.com/image.jpg',
-                        'caption' => 'This is an example of a caption of an image',
-                        'geo_location' => 'City, State',
-                        'title' => 'Example image',
-                        'license' => 'http://example.com/license',
-                    ],
-                ],
-            ],
-        ];*/
     }
 
     public function bootstrap($app)
@@ -102,74 +68,6 @@ class Module extends WebModule implements BootstrapInterface
             ],
             true
         );
-
-
-        $app->setComponents([
-            'sitemap' => [
-                'class' => 'panix\mod\sitemap\components\Sitemap',
-                'models' => [
-                    // your models
-                    //'panix\mod\news\models\News',
-                    // or configuration for creating a behavior
-                    /*[
-                        'class' => 'app\modules\news\models\News',
-                        'behaviors' => [
-                            'sitemap' => [
-                                'class' => '\panix\mod\sitemap\behaviors\SitemapBehavior',
-                                'scope' => function ($model) {
-
-                                    $model->select(['url', 'lastmod']);
-                                    $model->andWhere(['is_deleted' => 0]);
-                                },
-                                'dataClosure' => function ($model) {
-
-                                    return [
-                                        'loc' => \yii\helpers\Url::to($model->url, true),
-                                        'lastmod' => strtotime($model->lastmod),
-                                        'changefreq' => \panix\mod\sitemap\Module::DAILY,
-                                        'priority' => 0.8
-                                    ];
-                                }
-                            ],
-                        ],
-                    ],*/
-                ],
-                /*'urls' => [
-                    // your additional urls
-                    [
-                        'loc' => ['/news/default/index'],
-                        //'changefreq' => panix\mod\sitemap\components\Sitemap::DAILY,
-                        'priority' => 0.8,
-                        'news' => [
-                            'publication' => [
-                                'name' => 'Example Blog',
-                                'language' => 'en',
-                            ],
-                            'access' => 'Subscription',
-                            'genres' => 'Blog, UserGenerated',
-                            'publication_date' => 'YYYY-MM-DDThh:mm:ssTZD',
-                            'title' => 'Example Title',
-                            'keywords' => 'example, keywords, comma-separated',
-                            'stock_tickers' => 'NASDAQ:A, NASDAQ:B',
-                        ],
-                        'images' => [
-                            [
-                                'loc' => 'http://example.com/image.jpg',
-                                'caption' => 'This is an example of a caption of an image',
-                                'geo_location' => 'City, State',
-                                'title' => 'Example image',
-                                'license' => 'http://example.com/license',
-                            ],
-                        ],
-                    ],
-                ],*/
-                'enableGzip' => true, // default is false
-                'cacheExpire' => 1, // 1 second. Default is 24 hours,
-                'sortByPriority' => true, // default is false
-            ],
-        ]);
-
-
     }
 
 
