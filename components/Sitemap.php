@@ -71,9 +71,10 @@ class Sitemap extends \yii\base\Component
             $this->sortUrlsByPriority();
         }
 
+
         $parts = ceil(count($this->renderedUrls) / $this->maxSectionUrl);
 
-        if ($parts > 1) {
+        if ($parts >= 1) {
             $xml = new XMLWriter();
             //$xml->preserveWhiteSpace = true;
             //$xml->formatOutput = true;
@@ -105,8 +106,8 @@ class Sitemap extends \yii\base\Component
 
 
         if ($parts == 1) {
-            $result[0] = $result[1];
-            unset($result[1]);
+            //$result[0] = $result[1];
+           // unset($result[1]);
         }
 
         Yii::$app->cache->set($this->cacheKey, $result, $this->cacheExpire);
