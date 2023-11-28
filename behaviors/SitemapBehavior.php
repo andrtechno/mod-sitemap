@@ -2,9 +2,13 @@
 
 namespace panix\mod\sitemap\behaviors;
 
+use panix\mod\sitemap\components\Sitemap;
+use panix\mod\sitemap\components\SitemapQueue2;
 use Yii;
 use yii\base\Behavior;
 use yii\base\InvalidConfigException;
+use yii\data\Pagination;
+use yii\helpers\Url;
 
 /**
  * Behavior for XML Sitemap Yii2 module.
@@ -83,6 +87,8 @@ class SitemapBehavior extends Behavior
                 call_user_func($this->scope, $query);
             }
         }
+        echo $query->createCommand()->rawSql;
+        die;
         foreach ($query->each(self::BATCH_MAX_SIZE) as $model) {
             if (is_array($this->dataClosure)) {
                 $urlData = call_user_func($this->owner->{$this->dataClosure[1]}(), $model);
@@ -122,6 +128,46 @@ class SitemapBehavior extends Behavior
             ++$n;
         }
         return $result;
+    }
+
+
+    public function generateSiteMapNew()
+    {
+        $result = [];
+        $n = 0;
+        /** @var \yii\db\ActiveRecord $owner */
+        $owner = $this->owner;
+        $query = $owner::find();
+        if (is_array($this->scope)) {
+            if (is_callable($this->owner->{$this->scope[1]}())) {
+                call_user_func($this->owner->{$this->scope[1]}(), $query);
+            }
+        } else {
+            if (is_callable($this->scope)) {
+                call_user_func($this->scope, $query);
+            }
+        }
+        $limit = 5000;
+        $countQuery = clone $query;
+        $pages = new Pagination(['totalCount' => $countQuery->count()]);
+        $pages->setPageSize($limit);
+
+        $filesList = [];
+        for ($i = 1; $i <= $pages->pageCount; $i++) {
+            $oReflectionClass = new \ReflectionClass($owner);
+            $filename = 'sitemap-'.mb_strtolower($oReflectionClass->getShortName()) . '-' . $i;
+            $filesList[]=$filename;
+            Yii::$app->queue->push(new SitemapQueue2([
+                'query' => $query,
+                'limit' => $pages->limit,
+                'offset' => $pages->offset,
+                'page' => $i,
+                'filename' => $filename,
+            ]));
+            $pages->setPage($i);
+        }
+
+        return $filesList;
     }
 
 

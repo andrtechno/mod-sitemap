@@ -63,8 +63,8 @@ class Module extends WebModule implements BootstrapInterface
         $app->urlManager->addRules(
             [
               //  ['pattern' => 'robots1', 'route' => 'sitemap/default/robots-txt', 'suffix' => '.txt'],
-                ['pattern' => 'sitemap', 'route' => 'sitemap/default/xml', 'suffix' => '.xml'],
-                ['pattern' => 'sitemap', 'route' => 'sitemap/default/html'],
+               // ['pattern' => 'sitemap', 'route' => 'sitemap/default/xml', 'suffix' => '.xml'],
+                //['pattern' => 'sitemap', 'route' => 'sitemap/default/html'],
             ],
             true
         );

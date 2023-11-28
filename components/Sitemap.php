@@ -62,22 +62,25 @@ class Sitemap extends \yii\base\Component
     public function queue()
     {
 
-        $result = Yii::$app->cache->get($this->cacheKey);
-        if ($result) {
-            return $result;
-        }
+        //   $result = Yii::$app->cache->get($this->cacheKey);
+        // if ($result) {
+        //     return $result;
+        // }
         $this->generateUrls();
         if ($this->sortByPriority) {
             $this->sortUrlsByPriority();
         }
-
+        $result = [];
 
         $parts = ceil(count($this->renderedUrls) / $this->maxSectionUrl);
 
         if ($parts >= 1) {
             $xml = new XMLWriter();
-            //$xml->preserveWhiteSpace = true;
-            //$xml->formatOutput = true;
+            if (true) {
+                $xml->preserveWhiteSpace = true;
+                $xml->formatOutput = true;
+            }
+
             $xml->openMemory();
             $xml->startDocument('1.0', 'UTF-8');
             $xml->startElement('sitemapindex');
@@ -99,7 +102,7 @@ class Sitemap extends \yii\base\Component
         for ($i = 1; $i <= $parts; $i++) {
             Yii::$app->queue->push(new SitemapQueue([
                 'i' => $i,
-                'result'=>$result2,
+                'result' => $result2,
                 'renderedUrls' => $this->renderedUrls
             ]));
         }
@@ -107,13 +110,37 @@ class Sitemap extends \yii\base\Component
 
         if ($parts == 1) {
             //$result[0] = $result[1];
-           // unset($result[1]);
+            // unset($result[1]);
         }
 
-        Yii::$app->cache->set($this->cacheKey, $result, $this->cacheExpire);
+        // Yii::$app->cache->set($this->cacheKey, $result, $this->cacheExpire);
         return $result;
     }
 
+    public function queue2()
+    {
+        $list = [];
+        foreach ($this->models as $modelName) {
+            /** @var behaviors\SitemapBehavior $model */
+            if (is_array($modelName)) {
+                $model = new $modelName['class'];
+                if (isset($modelName['behaviors'])) {
+                    $model->attachBehaviors($modelName['behaviors']);
+                }
+
+            } else {
+                $model = new $modelName;
+
+                $diffs = array_diff(array_keys($model['behaviors']), ['sitemap', 'timestamp', 'tree']);
+                foreach ($diffs as $diff) {
+                    $model->detachBehavior($diff);
+                }
+            }
+            $list[] = $model->generateSiteMapNew();
+        }
+        return $list;
+
+    }
 
     public function render()
     {
@@ -220,8 +247,8 @@ class Sitemap extends \yii\base\Component
             } else {
                 $model = new $modelName;
 
-                $diffs = array_diff(array_keys($model['behaviors']),['sitemap','timestamp','tree']);
-                foreach ($diffs as $diff){
+                $diffs = array_diff(array_keys($model['behaviors']), ['sitemap', 'timestamp', 'tree']);
+                foreach ($diffs as $diff) {
                     $model->detachBehavior($diff);
                 }
             }
